@@ -1,0 +1,45 @@
+version: '3'
+volumes:
+  dbmysqldata: 
+networks:
+  database:
+  web:
+services: 
+  dbmysql: 
+    image: mysql:5.7
+    volumes:
+      # Volume dos dados
+      - dbmysqldata:/var/lib/mysql
+      # Scripts
+      - ./db/mysql/scripts:/scripts
+      - ./db/mysql/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - database
+  app:
+    build: app
+    restart: always
+    volumes:
+      # Aplicação Flask
+      - ./app:/app
+    working_dir: /app
+    command: bash -c "pip install -r requirements.txt && python app.py" # REMEMBER: put it in dockerfile
+    expose:
+        - 3000
+    networks:
+      - database
+      - web
+    depends_on:
+      - dbmysql
+  balancer:
+      image: nginx:1.13
+      volumes:
+        # Site
+        - ./nginx/static:/usr/share/nginx/html/
+        # Configuração do nginx (responsavel por servir arquivos estaticos e atuar como proxy reverso para o backend)
+        - ./nginx/default.config:/etc/nginx/conf.d/default.conf
+      ports:
+        - 80:80
+      networks:
+        - web
+      depends_on:
+        - app
