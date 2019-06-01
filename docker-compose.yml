@@ -16,15 +16,8 @@ services:
     networks:
       - database
   app:
-    build: app
+    build: app # Aplicação Flask
     restart: always
-    volumes:
-      # Aplicação Flask
-      - ./app:/app
-    working_dir: /app
-    command: bash -c "pip install -r requirements.txt && python app.py" # REMEMBER: put it in dockerfile
-    expose:
-        - 3000
     networks:
       - database
       - web
@@ -32,6 +25,7 @@ services:
       - dbmysql
   balancer:
       image: nginx:1.13
+      restart: on-failure
       volumes:
         # Site
         - ./nginx/static:/usr/share/nginx/html/
