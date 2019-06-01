@@ -1,4 +1,4 @@
-docker-compose up --scale app=2
+docker-compose up -d --scale app=2
 
 # View logs: $ docker-compose logs -f -t 
 # Shutdown: $ docker-compose down 
